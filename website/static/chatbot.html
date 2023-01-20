@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MinhaUFC</title>
+    <link rel="icon" type="image/x-icon" href="./favicon.ico">
+    <script src="https://bbb7.virtual.ufc.br/assets/modules/channel-web/inject.js"></script>
+    <link rel="stylesheet" href="https://bbb7.virtual.ufc.br/assets/modules/channel-web/inject.css">
+  </head>
+  <body>
+    <script>
+      window.botpressWebChat.init({
+        host: "https://bbb7.virtual.ufc.br",
+        botId: "bot_de_teste",
+        extraStylesheet: "https://bbb7.virtual.ufc.br/manager/static/bot_full.css",
+        botConvoDescription: "Assistente virtual da UFC",
+        showConversationsButton: false,
+        enableReset: false,
+        enableTranscriptDownload: false,
+        enablePersistHistory: false,
+        enableResetSessionShortcut: false,
+        showPoweredBy: false
+      });
+
+      window.addEventListener('message', function(event) {
+        if (event.data && event.data.name === 'webchatLoaded') {
+          window.botpressWebChat.mergeConfig({
+            containerWidth: '100%',
+            layoutWidth: '100%'
+          });
+          window.botpressWebChat.sendEvent({ type: 'show'});        
+        }
+      });
+
+      window.addEventListener("message", function (event) {
+       if (event.data.name === "webchatReady") {
+        window.botpressWebChat.sendEvent({
+          type: "proactive-trigger",
+          channel: "web",
+          payload: { text: "fake message" },
+        })
+       }
+      });
+
+    </script>
+  </body>
+</html>

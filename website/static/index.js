@@ -39,9 +39,9 @@ $(document).ready(function () {
 });
 
 function exportALL(){
-    window.location = '/export';
+    window.location = '/manager/export';
 }
 
 function exportNEW(){
-  window.location = '/export?new=true';
+  window.location = '/manager/export?new=true';
 }

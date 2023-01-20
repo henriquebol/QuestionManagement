@@ -1,26 +1,30 @@
 {% extends "base.html" %} {% block title %}Login{% endblock %} {% block content
 %}
-<form method="POST">
-  <h1 align="center">Página de login</h1>
-  <div class="form-group">
-    <label for="email">Email</label>
-    <input
-      type="email"
-      class="form-control"
-      id="email"
-      name="email"
-      placeholder="Coloque aqui seu Email"
-    />
-    <label for="senha">Senha</label>
-    <input
-      type="password"
-      class="form-control"
-      id="senha"
-      name="senha"
-      placeholder="Coloque aqui sua senha"
-    />
+<section class="vh-100" style="background-color: #508bfc;">
+  <div class="container py-5 h-100">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+      <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+        <div class="card shadow-2-strong" style="border-radius: 1rem;">
+          <div class="card-body p-5 text-center">
+            <form method="POST">
+              <h3 class="col-lg-12 px-0 ">
+                <img src="/manager/static/logo_minha.png" class="img-fluid w-50 p-3" alt="...">
+              </h3>
+
+              <div class="form-outline mb-4">
+                <input type="email" id="email" name="email" class="form-control form-control-lg" placeholder="Email"/>
+              </div>
+
+              <div class="form-outline mb-4">
+                <input type="password" id="senha" name="senha" class="form-control form-control-lg" placeholder="Senha"/>
+              </div>
+
+              <button class="btn btn-primary btn-lg btn-block" type="submit">Entrar</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-  <br />
-  <button type="submit" class="btn btn-primary">Enviar</button>
-</form>
+</section>
 {% endblock %}

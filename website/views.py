@@ -3,7 +3,7 @@ from email import message
 from sqlite3 import enable_shared_cache
 from flask import Blueprint, render_template, request, redirect, url_for, send_file
 from flask_login import login_required, current_user
-from .models import Qnas, Answers, Questions, Contexts
+from .models import Qnas, Answers, Questions, Contexts, Sector
 from . import db
 import json
 
@@ -40,7 +40,8 @@ def home():
     questions = Questions.query.all()
     contexts = Contexts.query.all()
     answers = Answers.query.all()
-    return render_template("home.html", user=current_user, qnas=qnas, questions=questions, answers=answers, contexts=contexts)
+    sectors = Sector.query.all()
+    return render_template("home.html", user=current_user, qnas=qnas, questions=questions, answers=answers, contexts=contexts, sectors=sectors)
 
 
 @views.route('/export')

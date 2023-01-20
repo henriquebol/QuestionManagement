@@ -1,138 +1,183 @@
 {% extends "base.html" %} {% block title %}Homepage{% endblock %} {% block
 content %}
-<br/>
-{% if user.userType == 'comum' %}
-<h2>Qnas</h2>
-<ul class="list-group list-group-flush">
-  {% for e in qnas %} {% if e.sector_id == current_user.sector_id %}
-  <li class="list-group-item">
-    <p>
-        {{e.id}}
-    </p>
-    <p>
-        <h5>Perguntas:</h5>
-        {% for t in questions %}
-        {% if t.qnas_id == e.id%}
-        {{ t.question }};
-        {% endif %}
-        {% endfor %}
-    </p>
-    <p>
-        <h5>Resposta:</h5>
-        
-        {% for t in answers %}
-        {% if t.qnas_id == e.id%}
-        {{ t.answer }}
-        {% endif %}
-        {% endfor %}
-    </p>
-    <p>
-      <h5>Contexto:</h5>
-      
-      {% for t in contexts %}
-      {% if t.qnas_id == e.id%}
-      {{ t.context }};
-      {% endif %}
-      {% endfor %}
-  </p>
-  </li>
-  {% endif %} {% endfor %}
-</ul>
-<br />
-{% endif %}
-
-{% if user.userType == 'admin' %}
-<h2>Qnas</h2>
-<ul class="list-group list-group-flush">
-  {% for e in qnas %}
-  <li class="list-group-item">
-    <p>
-        {{e.id}}
-    </p>
-    <p>
-        <h5>Perguntas:</h5>
-        {% for t in questions %}
-        {% if t.qnas_id == e.id%}
-        {{ t.question }};
-        {% endif %}
-        {% endfor %}
-    </p>
-    <p>
-        <h5>Resposta:</h5>
-        
-        {% for t in answers %}
-        {% if t.qnas_id == e.id%}
-        {{ t.answer }}
-        {% endif %}
-        {% endfor %}
-    </p>
-    <p>
-      <h5>Contexto:</h5>
-      
-      {% for t in contexts %}
-      {% if t.qnas_id == e.id%}
-      {{ t.context }};
-      {% endif %}
-      {% endfor %}
-  </p>
-  </li>
-  {% endfor %}
-</ul>
-<br />
-{% endif %}
-
-<button onclick="exportALL()" class="btn btn-primary">Exportar TUDO</button>
-<button onclick="exportNEW()" class="btn btn-primary">Exportar NOVOS</button>
-
-<br />
-<br />
-<h4>Adicionar nova QnA</h4>
-<br />
-<form method="POST">
-  <label for="answer">Resposta</label>
-  <input
-    class="form-control"
-    type="text"
-    name="answer"
-    id="answer"
-    placeholder="Coloque aqui a resposta"
-  />
-  <div class="input-wrapper">
-    <label for="question">Pergunta</label>
-    <input
-      class="form-control"
-      type="text"
-      name="question"
-      id="question"
-      placeholder="Coloque aqui a pergunta"
-    />
-    <a
-      href="javascript:void(0);"
-      class="add-input"
-      title="Adicionar nova pergunta"
-      ><h5><i class="bi bi-plus-square-fill"></i></h5
-    ></a>
+<section class="d-flex flex-column p-3" style="background-color: #ffffff;">
+  <div class="mx-auto" style="">
+    <h4>Perguntas frequentes</h4>
   </div>
 
-  <div class="context-wrapper">
-    <label for="context">Contexto</label>
-    <input
-      class="form-control"
-      type="text"
-      name="context"
-      id="context"
-      placeholder="Coloque aqui o contexto"
-      required
-    />
-    <a
-      href="javascript:void(0);"
-      class="add-context"
-      title="Adicionar novo contexto"
-      ><h5><i class="bi bi-plus-square-fill"></i></h5
-    ></a>
+  <div class="" style="">
+    <form method="POST">
+      <label for="question">Resposta</label>
+      <input
+        class="form-control"
+        type="text"
+        name="answer"
+        id="answer"
+        placeholder="Coloque aqui a resposta"
+      />
+      <div class="input-wrapper">
+        <label for="question">Pergunta</label>
+        <input
+          class="form-control"
+          type="text"
+          name="question"
+          id="question"
+          placeholder="Coloque aqui a pergunta"
+        />
+        <a
+          href="javascript:void(0);"
+          class="add-input"
+          title="Adicionar nova pergunta"
+          ><h5><i class="bi bi-plus-square-fill"></i></h5
+        ></a>
+      </div>
+
+      <div class="context-wrapper">
+        <label for="context">Contexto</label>
+        <input
+          class="form-control"
+          type="text"
+          name="context"
+          id="context"
+          placeholder="Coloque aqui o contexto"
+          required
+        />
+        <a
+          href="javascript:void(0);"
+          class="add-context"
+          title="Adicionar novo contexto"
+          ><h5><i class="bi bi-plus-square-fill"></i></h5
+        ></a>
+      </div>
+
+      <br />
+      <button type="submit" class="btn btn-primary">Adicionar nova</button>
+    </form>
   </div>
 
   <br />
-  <button type="submit" class="btn btn-primary">Adicionar</button>
-</form>
+  <br/>
+  <br/>
+  <!-- {% if user.userType == 'comum' %}
+  <h2>Qnas</h2>
+  <ul class="list-group list-group-flush">
+    {% for e in qnas %} {% if e.sector_id == current_user.sector_id %}
+    <li class="list-group-item">
+      <p>
+          {{e.id}}
+      </p>
+      <p>
+          <h5>Perguntas:</h5>
+          {% for t in questions %}
+          {% if t.qnas_id == e.id%}
+          {{ t.question }};
+          {% endif %}
+          {% endfor %}
+      </p>
+      <p>
+          <h5>Resposta:</h5>
+          
+          {% for t in answers %}
+          {% if t.qnas_id == e.id%}
+          {{ t.answer }}
+          {% endif %}
+          {% endfor %}
+      </p>
+      <p>
+        <h5>Contexto:</h5>
+        
+        {% for t in contexts %}
+        {% if t.qnas_id == e.id%}
+        {{ t.context }};
+        {% endif %}
+        {% endfor %}
+    </p>
+    </li>
+    {% endif %} {% endfor %}
+  </ul>
+  <br />
+  {% endif %} -->
+
+  {% if user.userType == 'admin' %}
+  <div class="table-responsive" style="">
+    <h4>Perguntas cadastradas</h4>
+    <table class="table table-hover">
+      <thead class="sticky-header">
+        <tr>
+          <th scope="col" style="width: 5%">Setor</th>
+          <th scope="col" style="width: 10%">Contexto</th>
+          <th scope="col" style="width: 20%">Resposta</th>
+          <th scope="col" style="width: 55%">Perguntas</th>
+          <th scope="col" style="width: 5%">Status</th>
+          <th scope="col" style="width: 5%">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in qnas %}
+          <tr>
+            <!-- <th scope="row">{{e.id}}</th> -->
+            <td>
+              {{sectors[e.sector_id-1].iniciais}}
+            </td> 
+            <td>
+              {% for t in contexts %}
+                {% if t.qnas_id == e.id%}
+                  {{ t.context }};
+                {% endif %}
+              {% endfor %}
+            </td>
+            <td>
+              {% for t in answers %}
+                {% if t.qnas_id == e.id%}
+                  {{ t.answer }}
+                  <br/>
+                {% endif %}
+              {% endfor %}
+            </td>
+            <td>
+              {% for t in questions %}
+                {% if t.qnas_id == e.id%}
+                  {{ t.question }};
+                  <br/>
+                {% endif %}
+              {% endfor %}
+            </td>
+            <td>
+              {% if e.enabled == 1%}
+                <span class="badge badge-primary rounded-pill d-inline">Ativa</span>
+              {% endif %}
+              {% if e.check == 1%}
+                <span class="badge badge-info rounded-pill d-inline">Validada</span>
+              {% endif %}
+              {% if e.sent == 1%}
+                <span class="badge badge-success rounded-pill d-inline">Enviada</span>
+              {% endif %}
+            </td>
+            <td>
+              <button
+                      type="button"
+                      class="btn btn-link btn-rounded btn-sm fw-bold"
+                      data-mdb-ripple-color="dark"
+                      >
+                Editar
+              </button>
+              <button
+                      type="button"
+                      class="btn btn-link btn-rounded btn-sm fw-bold"
+                      data-mdb-ripple-color="dark"
+                      >
+                Apagar
+              </button>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  
+  {% endif %}
+
+  <button onclick="exportALL()" class="btn btn-primary">Exportar TUDO</button>
+  <br />
+  <button onclick="exportNEW()" class="btn btn-primary">Exportar NOVAS</button>
+</section>
 {% endblock %}

@@ -1,34 +1,17 @@
-from website import create_app
-from flask import Flask, jsonify, make_response
 from flask_restful import Api, Resource, reqparse
-from flask_ngrok import run_with_ngrok
-from flask_sqlalchemy import SQLAlchemy
-from os import path
-from flask_login import LoginManager
 import json
 import requests
-import random
 from bs4 import BeautifulSoup as bs
-from datetime import datetime
+from flask import Blueprint
 
-app = create_app()
-api = Api(app)
+api_bp = Blueprint('api', __name__)
+api = Api(api_bp)
 
 def requisicao_site(url):
     response = requests.get(url)
     content = response.content
     site = bs(content,'html.parser')
     return site
-
-url = "https://www.ufc.br/restaurante/cardapio/1-restaurante-universitario-de-fortaleza/"
-response = requests.get(url)
-content_cardapio = response.content
-site = bs(content_cardapio,'html.parser') # passando html
-
-# Pegando os elementos do cardapio
-desjejum = site.find('table',attrs={'class':'refeicao desjejum'})
-almoco = site.find('table',attrs={'class':'refeicao almoco'})
-jantar = site.find('table',attrs={'class':'refeicao jantar'})
 
 def junta_palavras(vetor_string):
     texto = ''
@@ -38,11 +21,21 @@ def junta_palavras(vetor_string):
 
 # Retornando cardapio em formato dicionário
 def cardapio_do_dia():
+    site = requisicao_site('https://www.ufc.br/restaurante/cardapio/1-restaurante-universitario-de-fortaleza/')
+
+    # Pegando os elementos do cardapio
+    desjejum = site.find('table',attrs={'class':'refeicao desjejum'})
+    almoco = site.find('table',attrs={'class':'refeicao almoco'})
+    jantar = site.find('table',attrs={'class':'refeicao jantar'})
+
     dia = site.find('table').findAll('th')[1].text.split() # Dia da semana
     cardapio_json = {"restaurante_menu":[{"Dia": "{0}{1}".format(dia[0],dia[1])},{"Campi":"Pici"}]}
     desjejum_list= junta_palavras([i.text for i in desjejum('span')])
     almoco_list = junta_palavras([i.text for i in almoco('span')]) 
     jantar_list = junta_palavras([i.text for i in jantar('span')]) 
+    #cardapio_json["restaurante_menu"].append({"Desjejum": json.dumps((desjejum_list),ensure_ascii=False)})
+    #cardapio_json["restaurante_menu"].append({"Almoco":  json.dumps(almoco_list,ensure_ascii=False)})
+    #cardapio_json["restaurante_menu"].append({"Jantar": json.dumps((jantar_list),ensure_ascii=False)})
     cardapio_json["restaurante_menu"].append({"Desjejum": json.dumps((desjejum_list),ensure_ascii=False).replace('"',"")})
     cardapio_json["restaurante_menu"].append({"Almoco":  json.dumps(almoco_list,ensure_ascii=False).replace('"',"")})
     cardapio_json["restaurante_menu"].append({"Jantar": json.dumps((jantar_list),ensure_ascii=False).replace('"',"")})
@@ -60,56 +53,36 @@ def cardapio_quixada():
     except ConnectionError:
        cardapio_quixada = [{ "cardapio":[{'almoco': 'Houve um erro de conexão ao tentar requisitar o almoço'},{'jantar':'Houve um erro de conexão ao tentar requisitar o almoço'}]},'text']
     return json.dumps(cardapio_quixada,ensure_ascii = False)
-json_quixada = cardapio_quixada()
-cardapio_quixada = json.loads(json_quixada)
-
-def mostrar_menu():
-  ##Caso nao tenha cardápio
-  if desjejum == None:
-        dia = site.find('table').findAll('th')[1].text.split()
-        print(dia[0]+dia[1]+'\n'+site.find('td',attrs = {'colspan':'3'}).text)   # Mostra mensagem de não haver cardápio
-  else:
-    # transformando tipo DICIONÁRIO em formato json
-    cardapio = cardapio_do_dia()
-    json_menu = cardapio
-      # Retornando cardapio
-    print(json.loads(json_menu)['restaurante_menu'][0]['Dia']
-    + '\n')
-    print('Campi',':',json.loads(json_menu)['restaurante_menu'][1]['Campi'])
-    print('\n')
-    print('Desjejum:\n')
-    print(json.loads(json_menu)['restaurante_menu'][2]['Desjejum'])
-    print('\n')
-    print('Almoço:\n')
-    print(json.loads(json_menu)['restaurante_menu'][3]['Almoco'])
-    print('\n')
-    print('Jantar:\n')
-    print('\n')
-    print(json.loads(json_menu)['restaurante_menu'][4]['Jantar'])
 
 def checagem_de_retorno():
   try:
     menu = json.loads(cardapio_do_dia())
     aux = 0
   except:
+      site = requisicao_site('https://www.ufc.br/restaurante/cardapio/1-restaurante-universitario-de-fortaleza/')
       dia = site.find('table').findAll('th')[1].text.split()
-      menu = dia[0]+dia[1]+': '+ site.find('td',attrs = {'colspan':'3'}).text  # Mostra mensagem de não haver cardápio
+      #menu = dia[0]+dia[1]+': '+ site.find('td',attrs = {'colspan':'3'}).text  # Mostra mensagem de não haver cardápio
+      menu = dia[0]+': '+ site.find('td',attrs = {'colspan':'3'}).text  # Mostra mensagem de não haver cardápio
       aux = 1
   return [menu,aux]
-
-menu_ru_fort = checagem_de_retorno()
-menu_ru_quixada = cardapio_quixada
 
 # Rota GET ...get_ru/<string:campi>"
 class get_ru(Resource):
     def get(self,campi):
       self.campi = campi
       if campi == 'pici':
-          return menu_ru_fort
+        return checagem_de_retorno()
       elif campi == 'quixada':
-          return menu_ru_quixada
-    
+        return json.loads(cardapio_quixada())
+
 api.add_resource(get_ru, "/get_ru/<string:campi>")
+
+class TodoItem(Resource):
+    def get(self, id):
+        return {'task': 'Say "Hello, World!"'}
+
+api.add_resource(TodoItem, '/todos/<int:id>')
+
 
 prograd_json = [{'contatos': [[{'setor': 'Prograd'},
     {'resp': 'Pró-Reitora: Profª Ana Paula de Medeiros Ribeiro'},
@@ -544,18 +517,17 @@ def struture_location(setor,lat,log,address,title,desc,link_maps):
               return location
 
 # Prointer
-desc_prointer = "Em frente a livraria Arte e Ciência" # descrição de onde fica a prointer
+desc_prointer = "Chegando na recepção do prédio da reitoria, suba os 30 degraus das escadas posicionadas no centro da sala. A Prointer fica localizada na primeira porta à direita. Atenção: não é permitido entrar no prédio da Reitoria vestindo shorts ou bermudas."
 loc_prointer = struture_location("Prointer",
                   -3.741827464215639, 
                   -38.53896668465892,
-                  "Av. da Universidade, 2853 - Benfica - 60020-181 - Fortaleza – CE – Brasil",
-                  "Prédio da Reitoria, Altos",
+                  "Av. da Universidade, 2853 (Reitoria, Altos) - Benfica | CEP 60020-181 | Fortaleza - Ceará - Brasil",
+                  "Pró-Reitoria de Relações Internacionais e Desenvolvimento Institucional (Prointer) - UFC",
                   desc_prointer,
                   "https://goo.gl/maps/eLkVVHmRSNwcfnqm9")
 
-# Instituto Confúcio 
-
-desc_confucio = "Ao lado da praça Prisco Bezerra, em frente ao FG automóveis" 
+# Instituto Confúcio
+desc_confucio = "Ao lado da praça Prisco Bezerra. Entrada pela Seara da Ciência"
 loc_confucio = struture_location("Prointer",
                   -3.7394130073747687, -38.56946437265177,
                   "Rua Dr. Abdenago Rocha Lima, s/n - Campus do Pici, Fortaleza - CE, 60440-554",
@@ -564,30 +536,32 @@ loc_confucio = struture_location("Prointer",
                   "https://goo.gl/maps/vrmHuB9eKkbrtXxv8")
 
 # Prae
-desc_prae = "Ao lado da igreja Igreja de Nossa Senhora dos Remédio,em frente ao Branco do Brasil"
+desc_prae = "Entrada localizada em frente ao Branco do Brasil, do outro lado da rua. Após passar pelo portão, ande em linha reta até o 3º bloco. Suba as escadas localizadas do lado direito. A Prae está localizada no 1º andar, o local não é acessível por cadeira de rodas."
 loc_prae = struture_location("Prae",
                   -3.741597800417145,
                   -38.53828905915975,
-                  "Av. da Universidade, 2853 - Benfica",
-                  "Edifício",
+                  "Rua Paulino Nogueira, 315 - Bloco III - 1° Andar - Benfica - CEP 60020-270 - Fortaleza - CE",
+                  "Pró-Reitoria de Assuntos Estudantis (Prae) - UFC",
                   desc_prae,
                   "https://goo.gl/maps/2aiPH34CiDZRGfgt7")
+
 # COORDENADORIA  DE ATIVIDADES DESPORTIVAS
 desc_esportiva = "Quadra do CEU ao lado do Bloco de Psicologia"
 loc_esportiva = struture_location("Prae",
                   -3.7399934596046998,
                   -38.53890611868392,
                   "Av. da Universidade, 2762 - Centro, Fortaleza - CE, 60020-181",
-                  "Coordenadoria de atividade desportivas ",
+                  "Coordenadoria de atividade desportivas",
                   desc_esportiva,
                   "https://goo.gl/maps/3tM7RX9oTqUTgUiz6")
 
-desc_prograd = "A frente da Biblioteca Central existe uma escada que leva abaixo da mesma,siga por ela para chegar atrás da bibioteca,ali você encontrará encontrará a Prograd ao lado do Banco do Brasil."
+# PROGRAD
+desc_prograd = "Ao descer na parada da Biblioteca Central, ande aproximadamente 20 metros para esquerda. De frente a biblioteca, desça os 20 degraus das escadas localizadas do lado esquerdo da rampa principal. Após uma porta de vidro, você estará na Prograd. Do lado direito existem dois banheiros e, logo depois, um balcão de atendimento para protocolos. O ambiente é amplo e possui um conjunto de poltronas no centro"
 loc_prograd = struture_location("Prograd",
                   -3.7425018781683863,
                   -38.574071941963766,
-                  "Campus do Pici - Pici, Fortaleza - CE, 60455-760",
-                  "Rua Biblioteca Central",
+                  "Campus do Pici - Bloco 308, Fortaleza - CE, 60455-760",
+                  "Pró-Reitoria de Graduação (Prograd) - UFC",
                   desc_prograd,
                   "https://goo.gl/maps/Ah1rngrEGWFRsEZcA")
 
@@ -608,5 +582,5 @@ class get_location(Resource):
 
 api.add_resource(get_location,"/get_location/<string:loc>")
 
-if __name__ == '__main__':
-    app.run(debug=True)
+#if __name__ == '__main__':
+#    app.run(debug=True)
